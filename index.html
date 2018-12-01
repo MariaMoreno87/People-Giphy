@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>People Buttons</title>
+</head>
+
+<body>
+    <div id="buttons">
+        <button data-people="Harry Potter">Lumos Maxima!</button>
+        <button data-people="Darth Vader">I'm your Father!!</button>
+        <button data-people="Vicente Fernandez">Viva Mexico!!</button>
+        <button data-people="Princess Twilight Sparkle">Friendship is Magic!!</button>
+    </div>
+
+    <form id="people-form">
+        <label for="people-input">look for famous people</label>
+        <input type="text" id="people-input">
+        <br>
+        <input id="add-people" type="submit" value="Enter">
+    </form>
+    <div id="gifs-appear-here">
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+     
+    
+        
+        function addPeople () {
+            var people = $(this).attr("data-people");
+            var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + people + "&api_key=kRsHuhDISov3OLv59PyTyJHBnpNQclEY&limit=10";
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+                .then(function (response) {
+                    console.log(queryURL);
+                    console.log(response);
+                    var results = response.data;
+                    for (var i = 0; i < results.length; i++) {
+
+                        var peopleDiv = $("<div>");
+
+                        var p = $("<p>").text("Rating: " + results[i].rating);
+
+                        var peopleImage = $("<img>");
+                        peopleImage.attr("src", results[i].images.fixed_height_still.url);
+                        peopleImage.attr("data-still", results[i].images.fixed_height_still.url);
+                        peopleImage.attr("data-animate", results[i].images.fixed_height.url);
+                        peopleImage.attr("data-state", "still");
+                        peopleImage.addClass("pictures");
+
+                        peopleDiv.append(peopleImage);
+                        peopleDiv.append(p);
+                        
+                        $("#gifs-appear-here").prepend(peopleDiv);
+                    }
+                });
+        }
+
+
+        function animateGif () {
+            var state = $(this).attr("data-state");
+
+            console.log(state);
+
+            if (state === "still") {
+                $(this).attr("src", $(this).attr("data-animate"));
+                $(this).attr("data-state", "animate");
+            }
+
+            if (state === "animate") {
+                $(this).attr("src", $(this).attr("data-still"));
+                $(this).attr("data-state", "still");
+            }
+
+        }
+
+        function renderButtons(people) {
+            var newButtons = $("#buttons")
+            var a = $("<button>");
+            a.addClass("people");
+            a.attr("data-people", people);
+            a.text(people);
+            a.click(function () { addPeople(this) });
+            newButtons.append(a);
+        }
+        $("#add-people").on("click", function (event) {
+            event.preventDefault();
+            var people = $("#people-input").val().trim();
+            renderButtons(people);
+        });
+
+        $(document).on('click', "button", addPeople);
+        $(document).on('click', ".pictures", animateGif);
+
+
+    </script>
+</body>
+
+</html>
